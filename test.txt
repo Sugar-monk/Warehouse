@@ -1,0 +1,23 @@
+class Solution {
+public:
+    double Power(double base, int exponent) {
+        double re=1 ;
+        if(base==0){
+            return 0;
+        }
+        else {
+            if(exponent==0)
+                re=1;
+            if(exponent>0)
+            {
+            for(int i=0;i < exponent;i++)
+                    re =re*base; 
+            }
+            if(exponent<0){
+                for (int i=0;i>exponent;i--)
+                    re*=(1/base);
+            }
+        }
+        return re;
+    }
+};
