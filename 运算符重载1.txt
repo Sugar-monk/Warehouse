@@ -1,0 +1,11 @@
+¡°<<¡±Óë¡°>>¡±ÔËËã·ûÖØÔØ
+	friend ostream& operator<<(ostream& _cout, const Date& d)
+	{
+		_cout << d._year << "\\" << d._month << "\\" << d._day;
+		return _cout;
+	}
+	friend istream& operator>>(istream& _cin, Date& d)
+	{
+		_cin >> d._year >> d._month >> d._day;
+		return _cin;
+	}
