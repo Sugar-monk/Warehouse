@@ -71,19 +71,6 @@ void PreOrder(BTreeNode *root)
 	PreOrder(root->right);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 void InOrder(BTreeNode *root)
 {
 	if (root == NULL) { return; }
