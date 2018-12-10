@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <assert.h>
 
 struct BTreeNode;	// 结构体声明
