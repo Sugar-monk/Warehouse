@@ -1,5 +1,4 @@
 #pragma once
-
 /* Binary Tree */
 
 #include <stdlib.h>
