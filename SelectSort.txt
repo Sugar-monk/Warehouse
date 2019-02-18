@@ -1,0 +1,57 @@
+//选择排序：直接找最大的
+void SelectSort(int array[], int size)
+{
+	for (int i = 1; i < size; i++)
+	{
+		int max = 0;
+		for (int j = 1; j <= size - i; j++)
+		{
+			if (array[j] >= array[max])
+				max = j;
+		}
+		int tmp = array[max];
+		array[max] = array[size - 1];
+		array[size - 1] = tmp;
+	}
+}
+
+//升级版选择排序：同时找最大和最小值
+void SelectSortP(int array[], int size)
+{
+	int minSpace = 0;
+	int maxSpace = size - 1;
+
+	while (minSpace < maxSpace)
+	{
+		int min = minSpace;
+		int max = maxSpace;
+
+		//找最大数和最小数
+		for (int i = minSpace + 1; i <= maxSpace; i++)
+		{
+			if (array[i] < array[min])
+				min = i;
+			if (array[i] > array[max])
+				max = i;
+		}
+
+		//开始交换
+
+		//先交换小的
+		int tmp = array[min];
+		array[min] = array[minSpace];
+		array[minSpace] = tmp;
+
+		//如果大的下标和最小的下标有冲突，将最大的位置放到已经换了位置的最小的位置
+		if (max == minSpace)
+			max == min;
+		//在交换大的
+		int tmp = array[max];
+		array[max] = array[maxSpace];
+		array[maxSpace] = tmp;
+
+		minSpace++;
+		maxSpace--;
+	}
+}
+
