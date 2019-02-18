@@ -1,0 +1,30 @@
+//ÓµÓĞgapµÄ²åÅÅ
+void InsertSortWhitGap(int array[], int size, int gap)
+{
+	for (int i = gap; i < size; i++)
+	{
+		int j = 0;
+		int k = array[i];
+		for (j = i - gap; j >= 0; j -= gap)
+		{
+			if (array[j] <= k)
+				break;
+			array[j] = array[j + gap];
+		}
+		array[j + gap] = k;
+	}
+}
+
+//Ï£¶ûÅÅĞò
+void ShellSort(int array[], int size)
+{
+	int gap = size;
+	while (1)
+	{
+		gap = (gap / 3) + 1;
+		InsertSortWhitGap(array, size, gap);
+		if (1 == gap)
+			break;
+	}
+}
+
