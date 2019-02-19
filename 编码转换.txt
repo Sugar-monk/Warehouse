@@ -1,0 +1,55 @@
+//将GBK格式转化为UTF8
+string GBKToUTF8(string str)
+{
+	//将GBK转换为UTF16
+	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, 0);		//获取buffer的大小	
+	wchar_t* wstr = new wchar_t[len];				//wchar_t 宽字符		//将其他编码格式转化为UTF16编码格式
+	MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, wstr, len);
+	//将UTF16转换为UTF8
+	len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);	//获取buffer的大小
+	char* Utf8Str = new char[len];
+	WideCharToMultiByte(CP_UTF8, 0, wstr, -1, Utf8Str, len, NULL, NULL);	//将UTF16编码格式转化为其他编码格式
+	string out(Utf8Str);
+
+	//释放空间，否则会出现野指针的情况
+	if (wstr)
+	{
+		delete[] wstr;
+		wstr = NULL;
+	}
+	if (Utf8Str)
+	{
+		delete[] Utf8Str;
+		Utf8Str = NULL;
+	}
+
+	return out;
+}
+
+string Utf8ToGBk(string str)
+{
+	//将UTF8转换成UTF16
+	int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);  //获取buffer的大小
+	wchar_t* wstr = new wchar_t[len];
+	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wstr, len);			//将UTF8编码格式转化为UTF16编码格式
+
+	//将UTF16转换为GBK
+	len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);		//获取buffer的大小
+	char* GbkStr = new char[len];
+	WideCharToMultiByte(CP_ACP, 0, wstr, -1, GbkStr, len, NULL, NULL);		//将UTF16编码格式转化为GBK编码格式
+	string out(GbkStr);
+
+	//释放空间，否则会出现野指针的情况
+	if (wstr)
+	{
+		delete[] wstr;
+		wstr = NULL;
+	}
+	if (GbkStr)
+	{
+		delete[] GbkStr;
+		GbkStr = NULL;
+	}
+
+	return out;
+}
