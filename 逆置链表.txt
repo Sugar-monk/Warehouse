@@ -1,0 +1,39 @@
+//逆置打印链表
+void PrintTailToHead1(LNode **plist)
+{
+	//思路：新建一个节点，从当前链表中的第一个开始往过搬，
+	//但是不创建新空间，在新节点前面做头插
+	LNode *newNode = NULL;
+	LNode *node;
+	LNode *cur = *plist;
+	while (cur)
+	{
+		node = cur;
+		cur = cur->next;
+
+		node->next = newNode;
+		newNode = node;
+	}
+	PrintLinkList(&newNode);
+}
+void PrintTailToHead2(LNode **plist)
+{
+	//思路：定义三个指针，然后逆置链表中的指向关系，返回最后一个节点
+	if ((*plist) == NULL)
+		return NULL;
+	LNode *p0 = NULL;
+	LNode *p1 = *plist;
+	LNode *p2 = (*plist)->next;
+
+	while (p1 != NULL)
+	{
+		p1->next = p0;
+		p0 = p1;
+		p1 = p2;
+		if (p2 != NULL)
+		{
+			p2 = p2->next;
+		}
+	}
+	return p0;
+}
