@@ -1,0 +1,29 @@
+LNode* FindKthToTail(LNode** pListHead, unsigned int k) {
+	if (pListHead == NULL || k == 0)
+		return NULL;
+	LNode* frontNode = *pListHead;
+	LNode* endNode = *pListHead;
+	//先让第一个节点走k-1步
+	if (k > 1)
+	{
+		for (int i = 0; i < k - 1; ++i)
+		{
+			//检测链表中的节点是否比k个多
+			if (frontNode->next != NULL)
+			{
+				frontNode = frontNode->next;
+			}
+			else
+			{
+				return NULL;
+			}
+		}
+	}
+	while (frontNode->next != NULL)
+	{
+		frontNode = frontNode->next;
+		endNode = endNode->next;
+	}
+
+	return endNode;
+}
