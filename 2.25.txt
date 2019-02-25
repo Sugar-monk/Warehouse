@@ -1,0 +1,19 @@
+class Solution {
+public:
+    ListNode* ReverseList(ListNode* pHead) {
+        ListNode *newNode = NULL;
+        ListNode *node;
+        ListNode *cur = pHead;
+        while (cur)
+        {
+            //将第一个节点存放在node中
+            node = cur;
+            cur = cur->next;
+            //做头插
+            node->next = newNode;
+            newNode = node;
+        }
+        
+        return newNode;
+    }
+};
