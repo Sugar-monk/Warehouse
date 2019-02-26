@@ -1,0 +1,28 @@
+//查找链表的中间结点
+LNode* FindMidNode(LNode** Head)
+{
+	assert(Head != NULL);
+	LNode *pFast = *Head;
+	LNode *pLow = *Head;
+	LNode *pPre = NULL;
+	//遍历整个节点，使快指针走到最后
+	while (pFast && pFast->next)
+	{
+		pPre = pLow;
+		pFast = pFast->next->next;
+		pLow = pLow->next;
+	}
+	//开始判断节点是奇数还是偶数
+	if (pFast)		//如果pFast为空，就说明这个链表的个数是奇数，直接返回慢指针就可以
+		return pLow;
+	else
+		return pPre;
+
+	//思想：快慢指针，一个快指针，一次走两步，
+	//一个慢指针，一次走一步，快指针走到了结尾，
+	//慢指针指向的正好是中间的节点
+	//特殊：节点的个数为奇偶的
+		//奇数：直接返回慢指针
+		//偶数：分为两种情况：1、返回中间两个指针的后一个指针。。直接反回慢指针就可以
+							//2、反回中间两个指针的前一个指针。。需要重新定义一个指针，保存之前的慢指针，返回这个新指针
+}
