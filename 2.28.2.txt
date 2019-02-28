@@ -1,0 +1,27 @@
+class Printer {
+public:
+    vector<int> arrayPrint(vector<vector<int> > arr, int n) {
+         vector<int>ret;
+    //打印右上角部分
+    for(int i=n-1; i>=0; i--)
+    {
+        int line = 0;
+        int list = i;
+        while(line<n && list<n)
+        {
+            ret.push_back(arr[line++][list++]);
+        }
+    }
+    //打印左下角部分
+    for(int i = 1; i<n; i++)
+    {
+        int line = i;
+        int list = 0;
+        while(line<n && list<n)
+        {
+            ret.push_back(arr[line++][list++]);
+        }
+    }
+    return ret;
+    }
+};
