@@ -1,0 +1,13 @@
+int count_one_bits1(unsigned int value)
+{
+// 返回 1的位数
+	int count = 0;
+	while (value | 0)
+	{
+		if (value & 1)
+			count++;
+		value = value >> 1;
+	}
+	
+	return count;
+}
