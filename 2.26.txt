@@ -5,7 +5,6 @@ LNode* FindMidNode(LNode** Head)
 	LNode *pFast = *Head;
 	LNode *pLow = *Head;
 	LNode *pPre = NULL;
-	//遍历整个节点，使快指针走到最后
 	while (pFast && pFast->next)
 	{
 		pPre = pLow;
