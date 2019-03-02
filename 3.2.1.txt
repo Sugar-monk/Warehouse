@@ -1,0 +1,47 @@
+class Solution {
+public:
+    ListNode* Merge(ListNode* pHead1, ListNode* pHead2)
+    {
+        struct ListNode *newListNode = NULL;
+        struct ListNode *recListNode = NULL;
+        struct ListNode *pL1 = pHead1;
+        struct ListNode *pL2 = pHead2;
+        if(NULL == pL1)
+            return pL2;
+        if(NULL == pL2)
+            return pL1;
+        
+        if(pL1->val <= pL2->val)
+        {
+            newListNode = recListNode = pL1;
+            pL1 = pL1->next;
+        }
+        else
+        {
+            newListNode = recListNode = pL2;
+            pL2 = pL2->next;
+        }
+        
+        while(pL1 && pL2)
+        {
+            if(pL1->val <= pL2->val)
+            {
+                recListNode->next = pL1;
+                pL1 = pL1->next;
+            }
+            else
+            {
+                recListNode->next = pL2;
+                pL2 = pL2->next;
+            }
+            
+            recListNode = recListNode->next;
+        }
+        if(pL1)
+            recListNode->next = pL1;
+        else
+            recListNode->next = pL2;
+        
+        return newListNode;
+    }
+};
