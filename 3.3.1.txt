@@ -1,0 +1,30 @@
+//判断是否有环，如果有环，输出环的入口
+LNode* EntryNodeOfLoop(LNode* pHead)
+{
+	//定义两个指针，一个快指针，一个慢指针
+	LNode* Fast = pHead;
+	LNode* Slow = pHead;
+
+	while (Fast && Fast->next)
+	{
+		Fast = Fast->next->next;
+		Slow = Slow->next;
+		//如果两个指针相遇了，就说明这个链表有环
+		if (Fast == Slow)
+			break;
+	}
+	//如果while循环是因为快指针为空而结束，说明这个链表没有环
+	if (NULL == Fast || NULL == Fast->next)
+		return NULL;
+	//有环的情况下，定义两个指针，一个从链表的头部开始，一个从相遇点开始
+	LNode* pL = pHead;
+	LNode* pD = Fast;
+	//两个指针相遇的地方就是环的入口
+	while (pL != pD)
+	{
+		pL = pL->next;
+		pD = pD->next;
+	}
+
+	return pL;
+}
