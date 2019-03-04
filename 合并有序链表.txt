@@ -1,0 +1,43 @@
+LNode* mergeTwoLists(LNode* l1, LNode* l2) {
+	if (NULL == l1 || NULL == l2)
+		return NULL;
+	LNode* pNew = NULL;
+	LNode* head = pNew;
+	if (NULL == l1)
+		return l2;
+	if (NULL == l2)
+		return l1;
+	if (l1->data <= l2->data)
+	{
+		head = pNew = l1;
+		l1 = l1->next;
+	}
+	else
+	{
+		head = pNew = l2;
+		l2 = l2->next;
+	}
+
+	while (NULL != l1 && NULL != l2)
+	{
+		if (l1->data <= l2->data)
+		{
+			pNew->next = l1;
+			l1 = l1->next;
+		}
+		else
+		{
+			pNew->next = l2;
+			l2 = l2->next;
+		}
+
+		pNew = pNew->next;
+	}
+
+	if (l1)
+		pNew->next = l1;
+	else
+		pNew->next = l2;
+
+	return head;
+}
