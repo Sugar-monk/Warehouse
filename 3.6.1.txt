@@ -1,0 +1,30 @@
+int main()
+{
+	
+	char ch;
+	int count = 0;
+	printf("ÇëÊäÈë£¬Ctrl+c½áÊø\n");
+	while ((ch = getchar()) != EOF)
+	{
+		if (ch >= 'A' && ch <= 'Z')
+		{
+			printf("%c", ch + 32);
+		}
+		else if (ch >= 'a' && ch <= 'z')
+
+			printf("%c", ch - 32);
+		else if (ch >= '0' && ch <= '9')
+			continue;
+		else
+			printf("%c", ch);
+		count++;
+		if (count == 10)
+		{
+			printf("\n");
+			count = 0;
+		}
+			
+	}
+
+	return 0;
+}
