@@ -1,0 +1,30 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main()
+{
+    int num = 0;
+    vector<int> arr;
+    int ret = 1;
+    cin >> num;
+    arr.resize(num);
+    for(int i = 0; i < num; i++)
+        cin >> arr[i];
+    
+    for(int i = 1; i < num-1; ++i)
+    {
+        if((arr[i-1] > arr[i] && arr[i] < arr[i+1])
+           || (arr[i-1] < arr[i] && arr[i] > arr[i+1]))
+        {
+            ret++;
+            // 如果发现波峰或者波谷，这里i++已经比过了，则需要跳过，但是要注意越界。
+            if(i != num-3)
+                i++;
+        }
+    }
+    
+    cout << ret << endl;
+    return 0;
+}
