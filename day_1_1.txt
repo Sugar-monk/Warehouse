@@ -1,0 +1,23 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main()
+{
+    int n = 0;
+    long long sum = 0;
+    std::vector<int> arr;
+    std::cin >> n;
+    arr.resize(n*3);
+    
+    for(auto i = 0; i < n*3; ++i)
+        std::cin >> arr[i];
+    sort(arr.begin(),arr.end());
+    for (int i = n; i <= 3 * n - 2; i += 2){
+            sum += arr[i];
+        }
+    
+    cout << sum << endl;
+    return 0;
+}
