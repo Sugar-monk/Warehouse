@@ -1,0 +1,26 @@
+char judgeboard(char board[ROW][LINE], int row, int line)
+{
+	int i = 0;
+	for (i = 0; i < row; i++)                 //ºáÏòÅÐ¶Ï
+	{
+		if (board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][1] !=' ')
+		{
+			return board[1][1];
+		}
+	}
+	for (i = 0; i < row; i++)                 //ÊúÏòÅÐ¶Ï
+	{
+		if (board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != ' ')
+		{
+			return board[1][1];
+		}
+	}
+	if (board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != ' ')  // ÓÒÐ±ÅÐ¶Ï
+	{
+		return board[1][1];
+	}
+	if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[1][1] != ' ')  // ×óÐ±ÅÐ¶Ï
+	{
+		return board[1][1];
+	}
+}
