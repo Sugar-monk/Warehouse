@@ -1,0 +1,89 @@
+我们知道，用yum install gcc可以安装gcc编译环境，关于 GCC 在 CentOS 下通过 yum 安装默认版本号，CentOS 5 是 4.1.2；CentOS 6 是 4.4.7；CentOS 7 是 4.8.3。
+
+很多时候在编译安装软件都需要高版本的 GCC，否则就会报错。
+那么如何升级 GCC 的版本呢？
+
+首先要确认升级到的 GCC 版本号。
+目前 GCC 的最新版已经到了 5.2，而 CentOS 7 则依然使用其 4.8，所以基于兼容性考虑，我选择升级到 4.8.5。
+GCC 官网：https://gcc.gnu.org
+
+ 
+
+下面开始一步一步来编译安装 GCC 4.8.5，需要注意的是，在编译安装 GCC 之前，系统里必须先要通过 yum 安装老版本的 GCC 和依赖库。
+如果是在 x86_64 系统下编译的话，还需要安装 libgcc.i686 glibc-devel.i686 才行。
+
+yum install -y gcc texinfo-tex flex zip libgcc.i686 glibc-devel.i686
+当然，如果是在 CentOS 5 x86_64 系统下安装，则是如下命令：
+
+yum install -y gcc texinfo-tex flex zip libgcc.i386 glibc-devel.i386
+同时需注意，编译安装 GCC 内存不小于 1GB，Swap 不小于 1GB，硬盘最低不小于 10GB，否则极有可能会中途报错退出。
+编译安装完后，目录 gcc-4.8.5 将会有 5GB 之多。
+
+1、下载源码
+
+wget ftp://ftp.gnu.org/gnu/gcc/gcc-4.8.5/gcc-4.8.5.tar.gz
+2、下载依赖包
+编译安装 GCC 需要依赖 mpc，mpfr，gmp包。好在 GCC 源码里自带脚本可以轻松下载依赖包。
+
+tar zxf gcc-4.8.5.tar.gz
+cd gcc-4.8.5
+./contrib/download_prerequisites
+在此脚本里可以看到依赖包的版本号依次是 mpc-0.8.1，mpfr-2.4.2，gmp-4.3.2。
+
+3、编译安装
+
+mkdir gcc-build-4.8.5
+cd gcc-build-4.8.5
+../configure --prefix=/usr
+make && make install
+为了避免安装后系统里出现多个版本的 GCC，这里直接将编译安装的目录指定为 /usr，如果不指定 –prefix，则会默认安装到 /usr/local 下。
+GCC 4.8.5 光是源代码就有105MB，因此可以预见整个编译过程需要很长时间（差不多 2 个小时左右）。
+
+4、查看版本号
+
+gcc --version
+gcc (GCC) 4.8.5
+
+g++ --version
+g++ (GCC) 4.8.5
+
+which gcc
+/usr/bin/gcc
+
+which g++
+/usr/bin/g++
+注：本次是在 CentOS 6.7 x86_64 下安装成功。
+
+
+
+5、测试程序
+cd ~
+创建一个 main.cpp 文件，内容如下：
+
+    #include <iostream>
+    using namespace std;
+    int main() {
+        cout << "Hello world!" << endl;
+        return 0;
+    }
+    
+编译 main.cpp，执行如下命令：
+
+g++ main.cpp -o main
+执行生成的文件：
+./main
+
+输出如下：
+Hello world!
+
+写在最后
+通过 rpm 命令查询 GCC 包的安装情况：
+rpm -qa | grep gcc
+
+输出如下：
+gcc-4.4.7-16.el6.x86_64
+libgcc-4.4.7-16.el6.x86_64
+libgcc-4.4.7-16.el6.i686
+gcc-c++-4.4.7-16.el6.x86_64
+
+因此通过以上步骤编译安装 GCC 后，请慎用 yum update 或者通过 yum 来升级 GCC 的命令。
