@@ -1,0 +1,162 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+F:\ÖÇÄÜ´°Á±\´°Á±.uvproj
+Project File Date:  05/09/2019
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(235): error C141: syntax error near 'unsigned'
+MAIN.C(238): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C202: 'num': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(586): error C202: 'k4': undefined identifier
+MAIN.C(588): error C202: 'n': undefined identifier
+MAIN.C(589): error C202: 'num': undefined identifier
+MAIN.C(591): error C202: 'k4': undefined identifier
+MAIN.C(593): error C202: 'n': undefined identifier
+MAIN.C(594): error C202: 'num': undefined identifier
+MAIN.C(596): error C202: 'k4': undefined identifier
+MAIN.C(598): error C202: 'n': undefined identifier
+MAIN.C(599): error C202: 'num': undefined identifier
+MAIN.C(601): error C202: 'n': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(235): error C141: syntax error near 'unsigned'
+MAIN.C(238): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C202: 'num': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(586): error C202: 'k4': undefined identifier
+MAIN.C(588): error C202: 'n': undefined identifier
+MAIN.C(589): error C202: 'num': undefined identifier
+MAIN.C(591): error C202: 'k4': undefined identifier
+MAIN.C(593): error C202: 'n': undefined identifier
+MAIN.C(594): error C202: 'num': undefined identifier
+MAIN.C(596): error C202: 'k4': undefined identifier
+MAIN.C(598): error C202: 'n': undefined identifier
+MAIN.C(599): error C202: 'num': undefined identifier
+MAIN.C(601): error C202: 'n': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(235): error C141: syntax error near 'unsigned'
+MAIN.C(238): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C202: 'num': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(586): error C202: 'k4': undefined identifier
+MAIN.C(588): error C202: 'n': undefined identifier
+MAIN.C(589): error C202: 'num': undefined identifier
+MAIN.C(591): error C202: 'k4': undefined identifier
+MAIN.C(593): error C202: 'n': undefined identifier
+MAIN.C(594): error C202: 'num': undefined identifier
+MAIN.C(596): error C202: 'k4': undefined identifier
+MAIN.C(598): error C202: 'n': undefined identifier
+MAIN.C(599): error C202: 'num': undefined identifier
+MAIN.C(601): error C202: 'n': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(235): error C141: syntax error near 'unsigned'
+MAIN.C(238): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C202: 'num': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(586): error C202: 'k4': undefined identifier
+MAIN.C(588): error C202: 'n': undefined identifier
+MAIN.C(589): error C202: 'num': undefined identifier
+MAIN.C(591): error C202: 'k4': undefined identifier
+MAIN.C(593): error C202: 'n': undefined identifier
+MAIN.C(594): error C202: 'num': undefined identifier
+MAIN.C(596): error C202: 'k4': undefined identifier
+MAIN.C(598): error C202: 'n': undefined identifier
+MAIN.C(599): error C202: 'num': undefined identifier
+MAIN.C(601): error C202: 'n': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(235): error C141: syntax error near 'unsigned'
+MAIN.C(238): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C202: 'n': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(586): error C202: 'k4': undefined identifier
+MAIN.C(588): error C202: 'n': undefined identifier
+MAIN.C(589): error C202: 'num': undefined identifier
+MAIN.C(591): error C202: 'k4': undefined identifier
+MAIN.C(593): error C202: 'n': undefined identifier
+MAIN.C(594): error C202: 'num': undefined identifier
+MAIN.C(596): error C202: 'k4': undefined identifier
+MAIN.C(598): error C202: 'n': undefined identifier
+MAIN.C(599): error C202: 'num': undefined identifier
+MAIN.C(601): error C202: 'n': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(235): error C141: syntax error near 'unsigned'
+MAIN.C(238): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C202: 'n': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(586): error C202: 'k4': undefined identifier
+MAIN.C(588): error C202: 'n': undefined identifier
+MAIN.C(589): error C202: 'num': undefined identifier
+MAIN.C(591): error C202: 'k4': undefined identifier
+MAIN.C(593): error C202: 'n': undefined identifier
+MAIN.C(594): error C202: 'num': undefined identifier
+MAIN.C(596): error C202: 'k4': undefined identifier
+MAIN.C(598): error C202: 'n': undefined identifier
+MAIN.C(599): error C202: 'num': undefined identifier
+MAIN.C(601): error C202: 'n': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(235): error C141: syntax error near 'unsigned'
+MAIN.C(238): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C141: syntax error near 'unsigned'
+MAIN.C(582): error C202: 'n': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(586): error C202: 'k4': undefined identifier
+MAIN.C(588): error C202: 'n': undefined identifier
+MAIN.C(589): error C202: 'num': undefined identifier
+MAIN.C(591): error C202: 'k4': undefined identifier
+MAIN.C(593): error C202: 'n': undefined identifier
+MAIN.C(594): error C202: 'num': undefined identifier
+MAIN.C(596): error C202: 'k4': undefined identifier
+MAIN.C(598): error C202: 'n': undefined identifier
+MAIN.C(599): error C202: 'num': undefined identifier
+MAIN.C(601): error C202: 'n': undefined identifier
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+MAIN.C(127): error C202: 'table': undefined identifier
+MAIN.C(141): error C202: 'table1': undefined identifier
+MAIN.C(582): error C141: syntax error near 'uint'
+MAIN.C(582): error C202: 'n': undefined identifier
+MAIN.C(583): error C202: 'num': undefined identifier
+MAIN.C(587): error C202: 'k4': undefined identifier
+MAIN.C(589): error C202: 'n': undefined identifier
+MAIN.C(590): error C202: 'num': undefined identifier
+MAIN.C(592): error C202: 'k4': undefined identifier
+MAIN.C(594): error C202: 'n': undefined identifier
+MAIN.C(595): error C202: 'num': undefined identifier
+MAIN.C(597): error C202: 'k4': undefined identifier
+MAIN.C(599): error C202: 'n': undefined identifier
+MAIN.C(600): error C202: 'num': undefined identifier
+MAIN.C(602): error C202: 'n': undefined identifier
+MAIN.C(658): error C202: 'K1': undefined identifier
+Target not created
