@@ -1,0 +1,778 @@
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1                                                                                                     
+   2          #include <reg52.h>
+   3          //#include <intrins.h>
+   4            /*====================================
+   5           自定义类型名
+   6          ====================================*/
+   7          typedef unsigned char INT8U;
+   8          typedef unsigned char uchar;
+   9          
+  10          typedef unsigned int INT16U;
+  11          typedef unsigned int uint;
+  12          sbit IR  = P3^2;     //定义红外脉冲数据接口     外部中断O输入口
+  13          
+  14          
+  15          uchar IRtime;           //检测红外高电平持续时间（脉宽）
+  16          uchar IRcord[4];    //此数组用于储存分离出来的4个字节的数据（用户码2个字节+键值码2个字节）
+  17          uchar IRdata[33];   //此数组用于储存红外的33位数据（第一位为引导码用户码16+键值码16）
+  18          bit IRpro_ok, IRok;  //第一个用于红外接收4个字节完毕。IRok用为检测脉宽完毕
+  19          
+  20          ////uchar code table[]={0xfe,0xfc,0xfd,0xf9,0xfb,0xf3,0xf7,0xf6};
+  21          ////uchar code table1[]={0x7f,0xbf,0xdf,0xef,0xf7,0xfb,0xfd,0xfe};
+  22          //uchar code table[]={0xf1,0xf3,0xf2,0xf6,0xf4,0xfc,0xf8,0xf9};
+  23          //uchar code table1[]={0xf9,0xf8,0xfc,0xf4,0xf6,0xf2,0xf3,0xf1};
+  24          void delay_ms(uint x)
+  25          {
+  26   1         uint i,j;
+  27   1         for(i=x;i>0;i--)
+  28   1           for(j=110;j>0;j--);
+  29   1      }
+  30          
+  31          //初始化定时器0，外部中断0，串口
+  32          void init()
+  33          {
+  34   1          TMOD|=0X02;//设置定时器0工作方式2,8位自动重装
+  35   1              TL0=TH0=0;//初始化定时器0寄存器，定时器0溢出溢出时间为256个机器周期
+  36   1              EA=1;    //开启总中断
+  37   1              ET0=1;//开启定时器0中断                                         
+  38   1              TR0=1;//启动定时器0
+  39   1      
+  40   1              IT0=1;//设置外部中断0下降沿方式触发
+  41   1              EX0=1;//开外部中断0中断
+  42   1      
+  43   1              TMOD |=0X20;//设置定时器1工作模式2,8位自动重装
+  44   1              TL1=TH1=0Xfd;//比特率9600
+  45   1              SM1=1;//设置串口工作模式1,10位异步收发
+  46   1              TR1=1;//启动定时器1
+  47   1      }   
+  48          //定时器0中断，每中断溢出需要256*1.085us=277.76us
+  49          void time0() interrupt 1
+  50          {
+  51   1           IRtime++;
+  52   1      }
+  53          //外部中断0存入33次此脉宽
+  54          void int0() interrupt 0
+  55          {
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 2   
+
+  56   1          static uchar i;//静态变量用于存入33次数据计数
+  57   1              static bit startflag;//开始存储脉宽标志位，默认是0
+  58   1              if(startflag)
+  59   1              {
+  60   2                  //判断引导码，如果是引导码则从起始码开始存储
+  61   2                       if((IRtime<53)&&(IRtime>=32))
+  62   2                            i=0;
+  63   2                        IRdata[i]=IRtime;     //以T0溢出的次数来计算脉宽，把这个时间存在数组中
+  64   2                        IRtime=0;     //计数清零
+  65   2                        i++;          //计数脉宽存入次数
+  66   2                        if(i==33)       //脉宽次数等于33的时候代表已经存入33次
+  67   2                        {
+  68   3                            IRok=1;   //脉宽检查完成
+  69   3                                i=0;           //把脉宽计数清零
+  70   3                        }      
+  71   2              }
+  72   1              else
+  73   1              {
+  74   2                      IRtime=0;// 计数清零
+  75   2                  startflag=1;//开始处理标志位置1
+  76   2              }        
+  77   1      }
+  78          //把提取的33次脉宽安装NEC标准协议解码
+  79          void IRcordpro()
+  80          {
+  81   1         uchar i,j,k;//i用于计数处理四个字节；j用于计数处理一个字节的8位数据；k用于计数处理33位脉宽
+  82   1         k=1;//从第一位脉宽开始处理，丢掉起始码
+  83   1         for(i=0;i<4;i++)
+  84   1         {
+  85   2            for(j=0;j<8;j++)
+  86   2                {
+  87   3                    //如果脉宽大于数据0标准的1125us那么就判断为数据1
+  88   3                    if(IRdata[k]>5)    //判断高低电平
+  89   3                            IRcord[i] |=0x80;  //写1操作
+  90   3                        if(j<7)                               //只能右移7次，否则就把数据就移出去了
+  91   3                            IRcord[i]>>=1;
+  92   3                         k++; //处理下一次脉宽
+  93   3                }
+  94   2         }
+  95   1         IRpro_ok=1;
+  96   1      }
+  97          void main()
+  98          {
+  99   1        uchar i;      //计数串口发送字节数
+ 100   1        uchar j=0;
+ 101   1        init();  //初始化
+ 102   1        while(1)
+ 103   1        {
+ 104   2           if(IRok)  //判断是否完成33次的脉宽提取
+ 105   2               {
+ 106   3                  IRcordpro(); //根据
+ 107   3                      IRok=0;          //清零脉宽检查完成标志位等待下一次的脉宽检查
+ 108   3                      if(IRpro_ok)  //判断解码是否完成
+ 109   3                      {
+ 110   4      
+ 111   4      
+ 112   4                         for(i=0;i<4;i++)     //串口发送四个字节的数据
+ 113   4                         {
+ 114   5      
+ 115   5                                      IRcordpro(); //根据
+ 116   5                      switch(IRcord[2])
+ 117   5                                      {
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 3   
+
+ 118   6                                          case 0x15:   //+
+ 119   6                                                      if(i>0)
+ 120   6                                                       {
+ 121   7              
+ 122   7                                                              i--;
+ 123   7      
+ 124   7                                       
+ 125   7                                                               for(j=0;j<8;j++)
+ 126   7                                                   {
+ 127   8                                                      P1=table[j];
+*** ERROR C202 IN LINE 127 OF MAIN.C: 'table': undefined identifier
+ 128   8                                                                      delay_ms(1);
+ 129   8                                                  
+ 130   8                                                               }              
+ 131   7                                                }
+ 132   6                                                       break;    
+ 133   6                                           case 0x07:   //-
+ 134   6                                       if(i>0)
+ 135   6                                            {
+ 136   7                                                
+ 137   7                                              i--;
+ 138   7                                                 
+ 139   7                              for(j=0;j<8;j++)
+ 140   7                                          {
+ 141   8                                            P1=table1[j];
+*** ERROR C202 IN LINE 141 OF MAIN.C: 'table1': undefined identifier
+ 142   8                                                delay_ms(1);
+ 143   8                                          }
+ 144   7                                            }
+ 145   6                                         
+ 146   6                                                   break;
+ 147   6                                               case 0x46:
+ 148   6                                                 P1=0;delay_ms(5);            
+ 149   6                                                   break;
+ 150   6                                               case 0x45: 
+ 151   6                                                 P1 = 0XFF;delay_ms(5);               
+ 152   6                                                   break;
+ 153   6                                      }
+ 154   5                         }
+ 155   4                        IRpro_ok=0; //清零解码标志位等待下一次解码  
+ 156   4                      }
+ 157   3               }
+ 158   2        }
+ 159   1      }
+ 160          
+ 161          //****************************
+ 162          //        按键模块
+ 163          //****************************
+ 164          //#include<reg52.h>
+ 165          //#define uchar unsigned char
+ 166          //#define uint unsigned int                                                                                             
+ 167          //sbit K1=P3^0;         //      按下独立键盘S2正转
+ 168          //sbit K2=P3^1; //      按下独立键盘S3反转
+ 169          //sbit K3=P3^2; //      按下独立键盘S4停转
+ 170          uchar code table[]={0xf1,0xf3,0xf2,0xf6,0xf4,0xfc,0xf8,0xf9};
+ 171          uchar code table1[]={0xf9,0xf8,0xfc,0xf4,0xf6,0xf2,0xf3,0xf1};
+ 172          //
+ 173          //void delay(uchar z)
+ 174          //{
+ 175          //      uchar x,y;
+ 176          //      for(x=z;x>0;x--)
+ 177          //              for(y=110;y>0;y--);
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 4   
+
+ 178          //}
+ 179          //
+ 180          //void main()
+ 181          //{
+ 182          //      uchar k,i;
+ 183          //      P1=table[0];
+ 184          //      while(1)
+ 185          //      {
+ 186          //              if(!K1)
+ 187          //              delay(5);
+ 188          //              if(!K1)
+ 189          //              k=1;
+ 190          //
+ 191          //              if(!K2)
+ 192          //              delay(5);
+ 193          //              if(!K2)
+ 194          //              k=2;
+ 195          //
+ 196          //              if(!K3)
+ 197          //              delay(5);
+ 198          //              if(!K3)
+ 199          //              k=3;
+ 200          //
+ 201          //              if(k==1||k==2)
+ 202          //              {
+ 203          //                      for(i=0;i<8;i++)
+ 204          //                      {
+ 205          //                              if(k==1) P1=table[i];
+ 206          //                              else P1=table1[i];
+ 207          //                              delay(20);
+ 208          //                      }
+ 209          //              }
+ 210          //      }                                       
+ 211          //}
+ 212          /*
+ 213          PCF8591 AD芯片读取光敏数值，光线越强数码管数值越小，光线越暗数码管数据越大
+ 214          DA输出的数值会以LED10的亮度来体现，数码管数值超过100,LED10会微亮，数值增加
+ 215          LED10的亮度也增加。
+ 216          
+ 217          当数值大于150时，蜂鸣器会发出提示音。
+ 218          最简单的测试方法用手遮盖住光敏表面，数值会增加。
+ 219          */
+ 220          //#include <reg52.h>
+ 221          //#include <intrins.h>
+ 222          //#define MAIN_Fosc             11059200UL      //宏定义主时钟HZ
+ 223          //#define PCF8591_ADDR  0x90            //PCF8591地址
+ 224          //#define DACOUT_EN             0x40            //DAC输出使能
+ 225          //#define uchar unsigned char
+ 226          //#define uint unsigned int
+ 227          //sbit K1=P3^0;         //      按下独立键盘S2正转
+ 228          //sbit K2=P3^1; //      按下独立键盘S3反转
+ 229          //sbit K3=P3^2; //      按下独立键盘S4停转
+ 230          //sbit K4=P3^3; //      按下独立键盘s5跳转功能
+ 231          ///*====================================
+ 232          // 自定义类型名
+ 233          //====================================*/
+ 234          //typedef unsigned char INT8U;
+ 235          //typedef unsigned char uchar;
+ 236          //
+ 237          //typedef unsigned int INT16U;
+ 238          //typedef unsigned int uint;
+ 239          //
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 5   
+
+ 240          ///*====================================
+ 241          // 硬件接口位声明
+ 242          //====================================*/
+ 243          //sbit SDA = P2^0;   //I2C串行数据
+ 244          //sbit SCL = P2^1;   //I2C串行时钟
+ 245          //sbit DU  = P2^6;   //数码管段选
+ 246          //sbit WE  = P2^7;   //数码管位选
+ 247          //sbit LED1= P1^0;   //读取AD的值是否成功（亮成功，灭失败）
+ 248          //sbit LED2= P1^1;   //DAC成功输出（亮成功，灭失败）
+ 249          //sbit BEEP= P2^3;   //蜂鸣器引脚定义
+ 250          //
+ 251          //uchar AD_Value;       //存储AD转换回的数字量
+ 252          ///*====================================
+ 253          //共阴极数码管段选码
+ 254          //====================================*/
+ 255          //uchar code table[]={ 
+ 256          ////0           1        2     3     4     5     6     7     8
+ 257          //0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F,
+ 258          ////9     A     B          C     D         E     F              -        .        关显示
+ 259          //0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71, 0x40, 0x80, 0x00
+ 260          //                   };
+ 261          //
+ 262          ///*====================================
+ 263          //数码管位选码
+ 264          //====================================*/
+ 265          //                                   //第1位    2位       3位    4位   5位      6位       7位   8位
+ 266          //uchar code T_COM[] = {0xfe, 0xfd, 0xfb, 0xf7, 0xef, 0xdf, 0xbf, 0x7f};//数码管位码
+ 267          //uchar code table0[]={0xf1,0xf3,0xf2,0xf6,0xf4,0xfc,0xf8,0xf9};
+ 268          //uchar code table1[]={0xf9,0xf8,0xfc,0xf4,0xf6,0xf2,0xf3,0xf1};
+ 269          //
+ 270          //
+ 271          ///*====================================
+ 272          //函数：void Delay_Ms(INT16U ms)
+ 273          //参数：ms，毫秒延时形参
+ 274          //描述：12T 51单片机自适应主时钟毫秒级延时函数
+ 275          //====================================*/
+ 276          //void Delay_Ms(INT16U ms)
+ 277          //{
+ 278          //     INT16U i;
+ 279          //       do{
+ 280          //            i = MAIN_Fosc / 96000; 
+ 281          //                while(--i);   //96T per loop
+ 282          //     }while(--ms);
+ 283          //}
+ 284          //void Delay_Ms1(uint x)
+ 285          //{
+ 286          //   uint i,j;
+ 287          //   for(i=x;i>0;i--)
+ 288          //     for(j=110;j>0;j--);
+ 289          //}
+ 290          ///*====================================
+ 291          //函数：void Delay5us()
+ 292          //描述：12T 51单片机5微秒延时函数自适应时钟（11.0592M，12M,22.1184M）
+ 293          //====================================*/
+ 294          //void Delay5us()
+ 295          //{
+ 296          //      #if MAIN_Fosc == 11059200
+ 297          //              _nop_();
+ 298          //      #elif MAIN_Fosc == 12000000
+ 299          //              _nop_();
+ 300          //      #elif MAIN_Fosc == 22118400
+ 301          //              _nop_(); _nop_(); _nop_();
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 6   
+
+ 302          //      #endif
+ 303          //}
+ 304          //
+ 305          ///*====================================
+ 306          //函数：void Display(INT8U Value)
+ 307          //参数：Value,显示值 取值0-255
+ 308          //描述：共阴极数码管显示函数可显示一个字节的数
+ 309          //====================================*/
+ 310          //void Display(INT8U Value)
+ 311          //{
+ 312          ////------------------------------
+ 313          //      DU = 1;
+ 314          //      P0 = table[Value/100];  //管显示百位
+ 315          //      DU = 0;
+ 316          //
+ 317          //      P0 = 0xff;                               //清除断码
+ 318          //
+ 319          //      WE = 1;
+ 320          //      P0 = T_COM[0];                   //第一位数码管
+ 321          //      WE = 0;
+ 322          //      Delay_Ms(5);
+ 323          ////-------------------------------
+ 324          //      DU = 1;
+ 325          //      P0 = table[Value%100/10]; //显示十位
+ 326          //      DU = 0;
+ 327          //
+ 328          //      P0 = 0xff;                                //清除断码
+ 329          //
+ 330          //      WE = 1;
+ 331          //      P0 = T_COM[1];                    //第二位数码管
+ 332          //      WE = 0;
+ 333          //      Delay_Ms(5);
+ 334          ////-------------------------------
+ 335          //      DU = 1;
+ 336          //      P0 = table[Value%10];           //显示个位
+ 337          //      DU = 0;
+ 338          //                                                              
+ 339          //      P0 = 0xff;                                      //清除断码
+ 340          //
+ 341          //      WE = 1;
+ 342          //      P0 = T_COM[2];                          //第三位数码管
+ 343          //      WE = 0;
+ 344          //      Delay_Ms(5);
+ 345          //}
+ 346          //
+ 347          ///*====================================
+ 348          //函数：I2C_init()
+ 349          //描述：I2C总线初始化
+ 350          //====================================*/
+ 351          //void I2C_init()
+ 352          //{
+ 353          //      SDA = 1;   //数据总线高
+ 354          //      _nop_();
+ 355          //      SCL = 1;   //时钟总线高
+ 356          //      _nop_();
+ 357          //}
+ 358          //
+ 359          ///*====================================
+ 360          //函数：I2C_Start()
+ 361          //描述：I2C起始信号
+ 362          //====================================*/
+ 363          //void I2C_Start()  
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 7   
+
+ 364          //{
+ 365          //      SCL = 1;
+ 366          //      _nop_();
+ 367          //      SDA = 1;
+ 368          //      Delay5us();
+ 369          //      SDA = 0;
+ 370          //      Delay5us();
+ 371          //}
+ 372          //
+ 373          ///*====================================
+ 374          //函数：I2C_Stop()
+ 375          //描述：I2C停止信号
+ 376          //====================================*/
+ 377          //void I2C_Stop()
+ 378          //{
+ 379          //      SDA = 0;
+ 380          //      _nop_();
+ 381          //      SCL = 1;
+ 382          //      Delay5us();
+ 383          //      SDA = 1;
+ 384          //      Delay5us();
+ 385          //}
+ 386          //
+ 387          ///*====================================
+ 388          //函数：Master_ACK(bit i)
+ 389          //参数：i 为0时发送非应答 为1时发送应答
+ 390          //描述：I2C主机发送应答
+ 391          //====================================*/
+ 392          //void Master_ACK(bit i)        
+ 393          //{
+ 394          //      SCL = 0; // 拉低时钟总线允许SDA数据总线上的数据变化
+ 395          //      _nop_(); // 让总线稳定
+ 396          //      if (i)   //如果i = 1 那么拉低数据总线 表示主机应答
+ 397          //      {
+ 398          //              SDA = 0;
+ 399          //      }
+ 400          //      else     
+ 401          //      {
+ 402          //              SDA = 1;         //发送非应答
+ 403          //      }
+ 404          //      _nop_();//让总线稳定
+ 405          //      SCL = 1;//拉高时钟总线 让从机从SDA线上读走 主机的应答信号
+ 406          //      _nop_();
+ 407          //      SCL = 0;//拉低时钟总线， 占用总线继续通信
+ 408          //      _nop_();
+ 409          //      SDA = 1;//释放SDA数据总线。
+ 410          //      _nop_();
+ 411          //}
+ 412          //
+ 413          ///*====================================
+ 414          //函数：Test_ACK()
+ 415          //返回：0为非应答 1为应答
+ 416          //描述：I2C检测从机应答
+ 417          //====================================*/
+ 418          //bit Test_ACK()         // 检测从机应答
+ 419          //{
+ 420          //      SCL = 1;//时钟总线为高电平期间可以读取从机应答信号
+ 421          //      Delay5us();
+ 422          //      if (SDA)
+ 423          //      {
+ 424          //              SCL = 0;
+ 425          //              I2C_Stop();
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 8   
+
+ 426          //              return(0);
+ 427          //      }
+ 428          //      else
+ 429          //      {
+ 430          //              SCL = 0;
+ 431          //              return(1);
+ 432          //      }
+ 433          //}
+ 434          //
+ 435          ///*====================================
+ 436          //函数：I2C_send_byte(uchar byte)
+ 437          //参数：byte 要发送的字节
+ 438          //描述：I2C发送一个字节
+ 439          //====================================*/
+ 440          //void I2C_send_byte(uchar byte)
+ 441          //{
+ 442          //      uchar i;
+ 443          //      for(i = 0 ; i < 8 ; i++)
+ 444          //      {
+ 445          //              SCL = 0;
+ 446          //              _nop_();
+ 447          //              if (byte & 0x80)        //
+ 448          //              {
+ 449          //                      SDA = 1;
+ 450          //                      _nop_();
+ 451          //              }
+ 452          //              else
+ 453          //              {
+ 454          //                      SDA = 0;
+ 455          //                      _nop_();
+ 456          //              }
+ 457          //              SCL = 1;
+ 458          //              _nop_();
+ 459          //              byte <<= 1;
+ 460          //      }
+ 461          //      SCL = 0;
+ 462          //      _nop_();
+ 463          //      SDA = 1;
+ 464          //      _nop_();        
+ 465          //}
+ 466          //
+ 467          ///*====================================
+ 468          //函数：I2C_read_byte()
+ 469          //返回：读取的字节
+ 470          //描述：I2C读一个字节
+ 471          //====================================*/
+ 472          //uchar I2C_read_byte()
+ 473          //{
+ 474          //      uchar i, dat;
+ 475          //      SCL = 0 ;
+ 476          //      _nop_();
+ 477          //      SDA = 1;
+ 478          //      _nop_();
+ 479          //      for(i = 0 ; i < 8 ; i++)
+ 480          //      {
+ 481          //              SCL = 1;
+ 482          //              _nop_();
+ 483          //              dat <<= 1;        
+ 484          //              if (SDA)
+ 485          //              {
+ 486          //                      dat |= 0x01;  
+ 487          //              }
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 9   
+
+ 488          //              _nop_();
+ 489          //              SCL = 0;
+ 490          //              _nop_();
+ 491          //      }
+ 492          //      return(dat);
+ 493          //}
+ 494          //
+ 495          ///*DAC输出*/
+ 496          //bit DAC_OUT(uchar DAT)
+ 497          //{
+ 498          //      I2C_Start();
+ 499          //      I2C_send_byte(PCF8591_ADDR+0);
+ 500          //      if (!Test_ACK())
+ 501          //      {
+ 502          //              return(0);
+ 503          //      }
+ 504          //      I2C_send_byte(DACOUT_EN);       //DA输出使能 
+ 505          //      if (!Test_ACK())
+ 506          //      {
+ 507          //              return(0);
+ 508          //      }
+ 509          //      I2C_send_byte(DAT);
+ 510          //      if (!Test_ACK())
+ 511          //      {
+ 512          //              return(0);
+ 513          //      }
+ 514          //      I2C_Stop();
+ 515          //      return(1);      
+ 516          //}
+ 517          //
+ 518          ///*读AD数据*/
+ 519          //bit ADC_Read(uchar CON)
+ 520          //{
+ 521          //      I2C_Start();
+ 522          //      I2C_send_byte(PCF8591_ADDR+0);
+ 523          //      if (!Test_ACK())
+ 524          //      {
+ 525          //              return(0);
+ 526          //      }
+ 527          //      I2C_send_byte(CON);
+ 528          //      Master_ACK(0);
+ 529          //      I2C_Start();
+ 530          //      I2C_send_byte(PCF8591_ADDR+1);
+ 531          //      if (!Test_ACK())
+ 532          //      {
+ 533          //              return(0);
+ 534          //      }
+ 535          //      AD_Value = I2C_read_byte();
+ 536          //      Master_ACK(0);
+ 537          //      I2C_Stop();
+ 538          //      return(1);      
+ 539          //}
+ 540          
+ 541          //void main()
+ 542          //{
+ 543          //    
+ 544          //      uint i;
+ 545          //      I2C_init();
+ 546          //      while(1)
+ 547          //      {               
+ 548          //              //单端输入，读出通道0的值(光敏)
+ 549          //              if (ADC_Read(0x00))     LED1 = 0;       else    LED1 = 1;       
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 10  
+
+ 550          //              if (DAC_OUT(AD_Value))  LED2 = 0;       else    LED2 = 1;
+ 551          //              Display(AD_Value);
+ 552          //              if (AD_Value > 150)
+ 553          //              {
+ 554          //                  Display(AD_Value);
+ 555          //                      //BEEP = 0;
+ 556          //                      for(i=0;i<8;i++)
+ 557          //                        {
+ 558          //                           P1=table0[i];
+ 559          //                               Display(AD_Value);
+ 560          //                           Delay_Ms(3);
+ 561          //                               
+ 562          //                        }
+ 563          //              }
+ 564          //              else    
+ 565          //              {
+ 566          //                Display(AD_Value);
+ 567          //                //BEEP = 1;
+ 568          //                for(i=0;i<8;i++)
+ 569          //                        {
+ 570          //                           P1=table1[i];
+ 571          //                               Display(AD_Value);
+ 572          //                           Delay_Ms(3);
+ 573          //                               
+ 574          //                        } 
+ 575          //              }       
+ 576          //      }       
+ 577          //}
+ 578          void main()
+ 579          {
+ 580   1              uchar k,i;
+ 581   1              P1=table[0];
+ 582   1              uint n,num;
+*** ERROR C141 IN LINE 582 OF MAIN.C: syntax error near 'uint'
+*** ERROR C202 IN LINE 582 OF MAIN.C: 'n': undefined identifier
+ 583   1              num = 0;
+*** ERROR C202 IN LINE 583 OF MAIN.C: 'num': undefined identifier
+ 584   1      
+ 585   1              while(1)
+ 586   1              {
+ 587   2                      if(k4 && num == 0 || !k4 && num == 3)     //第一个功能
+*** ERROR C202 IN LINE 587 OF MAIN.C: 'k4': undefined identifier
+ 588   2                      {
+ 589   3                              n = 1;
+*** ERROR C202 IN LINE 589 OF MAIN.C: 'n': undefined identifier
+ 590   3                              num = 1;
+*** ERROR C202 IN LINE 590 OF MAIN.C: 'num': undefined identifier
+ 591   3                      }
+ 592   2                      else if (!k4 && num == 1 || k4 && num == 1) //第二个功能
+*** ERROR C202 IN LINE 592 OF MAIN.C: 'k4': undefined identifier
+ 593   2                      {
+ 594   3                              n = 2;
+*** ERROR C202 IN LINE 594 OF MAIN.C: 'n': undefined identifier
+ 595   3                              num = 2;
+*** ERROR C202 IN LINE 595 OF MAIN.C: 'num': undefined identifier
+ 596   3                      }
+ 597   2                      else if (k4 && num == 2 || !k4 && num == 2)      //第三个功能
+*** ERROR C202 IN LINE 597 OF MAIN.C: 'k4': undefined identifier
+ 598   2                      {
+ 599   3                              n = 3;
+*** ERROR C202 IN LINE 599 OF MAIN.C: 'n': undefined identifier
+ 600   3                              num = 3;
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 11  
+
+*** ERROR C202 IN LINE 600 OF MAIN.C: 'num': undefined identifier
+ 601   3                      }
+ 602   2                      switch(n)
+*** ERROR C202 IN LINE 602 OF MAIN.C: 'n': undefined identifier
+ 603   2                      {
+ 604   3                              case 2:
+ 605   3                              {
+ 606   4      //                              while(1)
+ 607   4      //                              {               
+ 608   4      //                                      uint i=0;
+ 609   4      //                                      //单端输入，读出通道0的值(光敏)
+ 610   4      //                                      if (ADC_Read(0x00))     LED1 = 0;       else    LED1 = 1;       
+ 611   4      //                                      if (DAC_OUT(AD_Value))  LED2 = 0;       else    LED2 = 1;
+ 612   4      //                                      Display(AD_Value);
+ 613   4      //                                      if (AD_Value > 150)
+ 614   4      //                                      {
+ 615   4      //                                          i++;
+ 616   4      //                                          Display(AD_Value);
+ 617   4      //                                              //BEEP = 0;
+ 618   4      //                                              for(i=0;i<8;i++)
+ 619   4      //                                                {
+ 620   4      //                                                   P1=table0[i];
+ 621   4      //                                                       Display(AD_Value);
+ 622   4      //                                                   Delay_Ms(3);
+ 623   4      //                                                       
+ 624   4      //                                                }
+ 625   4      //                                              if(i==1)
+ 626   4      //                                              {
+ 627   4      //                                                return;
+ 628   4      //                                              }
+ 629   4      //                                      }
+ 630   4      //                                      else    
+ 631   4      //                                      {
+ 632   4      //                                         i++;
+ 633   4      //                                        Display(AD_Value);
+ 634   4      //                                        //BEEP = 1;
+ 635   4      //                                        for(i=0;i<8;i++)
+ 636   4      //                                                {
+ 637   4      //                                                   P1=table1[i];
+ 638   4      //                                                       Display(AD_Value);
+ 639   4      //                                                   Delay_Ms(3);
+ 640   4      //                                                       
+ 641   4      //                                                } 
+ 642   4      //                                        if(i==1)
+ 643   4      //                                        {
+ 644   4      //                                              return;
+ 645   4      //                                        }
+ 646   4      //                                      }
+ 647   4      //                              
+ 648   4      //                              }
+ 649   4                              
+ 650   4                                  
+ 651   4                              }       
+ 652   3                                      break;
+ 653   3                      
+ 654   3                              case 1:
+ 655   3                              {
+ 656   4                                      while(1)
+ 657   4                                      {
+ 658   5                                              if(!K1)
+*** ERROR C202 IN LINE 658 OF MAIN.C: 'K1': undefined identifier
+ 659   5                                              delay(5);
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 12  
+
+ 660   5                                              if(!K1)
+ 661   5                                              k=1;
+ 662   5                              
+ 663   5                                              if(!K2)
+ 664   5                                              delay(5);
+ 665   5                                              if(!K2)
+ 666   5                                              k=2;
+ 667   5                              
+ 668   5                                              if(!K3)
+ 669   5                                              delay(5);
+ 670   5                                              if(!K3)
+ 671   5                                              k=3;
+ 672   5                              
+ 673   5                                              if(k==1||k==2)
+ 674   5                                              {
+ 675   6                                                      for(i=0;i<8;i++)
+ 676   6                                                      {
+ 677   7                                                              if(k==1) P1=table0[i];
+ 678   7                                                              else P1=table1[i];
+ 679   7                                                              delay(20);
+ 680   7                                                      }
+ 681   6                                              }
+ 682   5                                              if(!k4&&num=1)
+ 683   5                                              {
+ 684   6                                                      TR0=1;
+ 685   6                                                      break;
+ 686   6                                              }                                          
+ 687   5                                      }       
+ 688   4      
+ 689   4                                      break;
+ 690   4                              }
+ 691   3                              }
+ 692   2                                      
+ 693   2                      }
+ 694   1              }
+ 695          }
+ 696          //void main()
+ 697          //{
+ 698          //      uchar k,i;
+ 699          //      P1=table[0];
+ 700          //      while(1)
+ 701          //      {
+ 702          //              if(!K1)
+ 703          //              delay(5);
+ 704          //              if(!K1)
+ 705          //              k=1;
+ 706          //
+ 707          //              if(!K2)
+ 708          //              delay(5);
+ 709          //              if(!K2)
+ 710          //              k=2;
+ 711          //
+ 712          //              if(!K3)
+ 713          //              delay(5);
+ 714          //              if(!K3)
+ 715          //              k=3;
+ 716          //
+ 717          //              if(k==1||k==2)
+ 718          //              {
+ 719          //                      for(i=0;i<8;i++)
+ 720          //                      {
+ 721          //                              if(k==1) P1=table0[i];
+C51 COMPILER V9.00   MAIN                                                                  05/09/2019 19:18:07 PAGE 13  
+
+ 722          //                              else P1=table1[i];
+ 723          //                              delay(20);
+ 724          //                      }
+ 725          //              }
+ 726          //      }                                       
+ 727          //}
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  16 ERROR(S)
