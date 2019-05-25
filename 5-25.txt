@@ -1,0 +1,107 @@
+#include "Dlist.h"
+#include<malloc.h>
+#include<stdio.h>
+#include<assert.h>
+void DListInit(PDLNode *pHead)
+{
+	(*pHead) = (PDLNode)malloc(sizeof(DLNode));
+
+	if (NULL == (*pHead))
+	{
+		assert(0);
+		return ;
+	}
+
+	(*pHead)->_pNext = *pHead;
+	(*pHead)->_pPre = *pHead;
+}
+#if 1
+
+
+void DListPushBack(PDLNode pHead, DLDataType data)
+{
+	assert(pHead);
+	PDLNode pNewNode = BuyNewNode(data);
+	pNewNode->_pNext = pHead;				//新节点的下一个指针指向头节点
+	pNewNode->_pPre = pHead->_pPre;			//新节点的前一个指针指向之前链表最后一个
+	pHead->_pPre->_pNext = pNewNode;		//头节点的前一个指向新节点
+	pHead->_pPre = pNewNode;		//链表的之前最后一个直线新节点
+
+}
+void DListPophBack(PDLNode pHead)
+{
+	assert(pHead);
+	PDLNode pDelNode = pHead->_pPre;
+	pHead->_pPre = pDelNode->_pPre;
+	pDelNode->_pPre->_pNext = pHead;
+
+	free(pDelNode);
+}
+void DListPushFront(PDLNode pHead, DLDataType data)
+{
+	assert(pHead);
+	PDLNode pNewNode = BuyNewNode(data);
+	pNewNode->_pPre = pHead;
+	pNewNode->_pNext = pHead->_pNext;
+	pHead->_pNext = pNewNode;
+	pNewNode->_pNext->_pPre = pNewNode;
+}
+void DListPopFront(PDLNode pHead)
+{
+	assert(pHead);
+	if (pHead == pHead->_pNext)
+		return;
+	PDLNode pDelNode = pHead->_pNext;
+	pHead->_pNext = pDelNode->_pNext;
+	pDelNode->_pNext->_pPre = pHead;
+
+	free(pDelNode);
+}
+void DListInsert(PDLNode pos, DLDataType data)
+{
+	if (NULL == pos)
+		return;
+	PDLNode pNewNode = BuyNewNode(data);
+	pNewNode->_pNext = pos;
+	pNewNode->_pPre = pos->_pPre;
+	pNewNode->_pPre->_pNext = pNewNode;
+	pos->_pPre = pNewNode;
+}
+void DListErase(PDLNode pos)
+{
+	if (NULL == pos)
+		return;
+	PDLNode pDelNode = pos;
+	pDelNode->_pPre->_pNext = pDelNode->_pNext;
+	pDelNode->_pNext->_pPre = pDelNode->_pPre;
+	free(pDelNode);
+}
+void DListClear(PDLNode pHead)
+{
+	if (NULL == pHead)
+		return;
+	PDLNode pCur = pHead->_pNext;
+	while (pCur)
+	{
+		PDLNode pDel = pCur;
+		pCur = pCur->_pNext;
+		free(pDel);
+	}
+
+	pHead->_pNext = pHead;
+	pHead->_pPre = pHead;
+}
+void DListDestroy(PDLNode *pHead)
+{
+	if (NULL == pHead)
+		return;
+	DListClear(pHead);
+	free(*pHead);
+	(*pHead) = NULL;
+}
+#endif
+void TestDList()
+{
+	PDLNode pHead = NULL;
+	DListInit(&pHead);
+}
