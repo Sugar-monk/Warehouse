@@ -1,0 +1,44 @@
+void HeapAdjust(HPData* array, int size, int root)
+{
+	int child = root * 2 + 1;
+	while (child < size)
+	{
+		if (child + 1 < size && array[child] < array[child + 1])
+			child += 1;
+
+		if (array[child] > array[root])
+		{
+			swap(array[child], array[root]);
+			root = child;
+			child = root * 2 + 1;
+		}
+		else
+			return;
+	}
+}
+
+void HeapSort(HPData* array, int size)
+{
+	//建大堆
+	//找倒数第一个非叶子节点
+	int root = (size - 2) >> 1;
+	for (; root >= 0; --root)
+		HeapAdjust(array, size, root);
+
+	//开始排序，使用删除节点的思想
+	
+	int end = size - 1;
+	while (end)
+	{
+		swap(array[0], array[end]);
+		HeapAdjust(array, end, 0);
+		end--;
+	}
+}
+
+void Test()
+{
+	int array[] = { 2, 3, 8, 0, 9, 1, 7, 4, 6, 5 };
+	HeapSort(array, sizeof(array) / sizeof(array[0]));
+
+}
