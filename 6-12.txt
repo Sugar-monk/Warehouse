@@ -1,0 +1,134 @@
+#include "heap.h"
+#include <assert.h>
+#include <algorithm>
+#include <iostream>
+#include <stdlib.h>
+
+using namespace std;
+
+int less(HPData left, HPData right)
+{
+	return left < right;
+}
+int greater(HPData left, HPData right)
+{
+	return left > right;
+}
+void AdjustDown(HPData* array, int size, int root, PCOM compare)
+{
+	int child = root * 2 + 1;
+	while (child < size)
+	{
+		//找左右孩子中最小的孩子
+		if (child - 1 < size && compare(array[child],array[child - 1]))
+			child += 1;
+
+		if (compare(array[child], array[root]))
+		{
+			swap(array[root], array[child]);
+			root = child;
+			child = root * 2 + 1;
+		}
+		else
+			return;
+	}
+}
+
+void AdjustUp(HPData* array, int size, int child, PCOM compare)
+{
+	int root = (child - 1) >> 1;
+
+	while (child)
+	{
+		if (compare(array[child], array[root]))
+		{
+			swap(array[root], array[child]);
+			child = root;
+			root = (child - 1) >> 1;
+		}
+		else
+			return;
+	}
+}
+
+void CheckCapacity(Heap* hp)
+{
+	assert(hp);
+	int newcapacity = hp->_size * 2;
+	HPData* array = (HPData*)malloc(sizeof(HPData) * newcapacity);
+	if (array == NULL)
+	{
+		assert(0);
+		return;
+	}
+
+	for (int i = 0; i < hp->_size; ++i)
+		array[i] = hp->_array[i];
+	hp->_capacity = newcapacity;
+
+	free(hp->_array);
+	hp->_array = array;
+}
+void InitHeap(Heap* hp, HPData* array, int size, PCOM compare)
+{
+	assert(hp);
+	hp->_array = (HPData*)malloc(sizeof(HPData)*size);
+	if (NULL == hp->_array)
+	{
+		assert(0);
+		return;
+	}
+
+	hp->_capacity = size;
+	hp->_size = size;
+	hp->_compare = compare;
+	for (int i = 0; i < size; ++i)
+		hp->_array[i] = array[i];
+
+	int root = ((size - 2) >> 1);
+	for ( ;root >= 0; --root)
+		AdjustDown(hp->_array, size, root, compare);
+}
+
+
+void InsertHeap(Heap* hp, HPData data, PCOM compare)
+{
+	if (hp->_size == hp->_capacity)
+		CheckCapacity(hp);
+	hp->_array[hp->_size] = data;
+	AdjustUp(hp->_array, hp->_size, hp->_size - 1, compare);
+
+}
+int HeapSize(Heap* hp)
+{
+	assert(hp);
+	return hp->_size;
+}
+HPData HeapTop(Heap* hp)
+{
+	assert(hp);
+	return hp->_array[0];
+}
+bool HeapEmpty(Heap* hp)
+{
+	assert(hp);
+	return hp->_size == 0;
+}
+void EraseHeap(Heap* hp)
+{
+	if (HeapEmpty(hp))
+		return;
+	swap(hp->_array[0], hp->_array[hp->_size - 1]);
+	hp->_size -= 1;
+	AdjustDown(hp->_array, hp->_size, 0, hp->_compare);
+}
+void DostroyHeap(Heap* hp)
+{
+	assert(hp);
+	if (hp->_array)
+	{
+		free(hp->_array);
+		hp->_capacity = 0;
+		hp->_size = 0;
+	}
+}
