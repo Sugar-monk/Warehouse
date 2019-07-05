@@ -1,0 +1,69 @@
+//插入排序
+void InsertSort(vector<int>& arr)
+{
+	int size = arr.size();
+	for (int i = 1; i < size; ++i)
+	{
+		//待插入元素
+		int key = arr[i];
+
+		//找插入位置
+		int end = i - 1;
+		while (end >= 0 && arr[end] > key)
+		{
+			arr[end + 1] = arr[end];
+			end--;
+		}
+
+		//开始插入
+		arr[end + 1] = key;
+	}
+}
+
+//希尔排序（插入排序思想）
+/*
+1、将
+*/
+void ShellSort(vector<int>& arr)
+{
+	int size = arr.size();
+	int gap = size;
+	while (gap > 0)
+	{
+		gap = gap / 3 + 1;
+		for (int i = gap; i < size; ++i)
+		{
+			//待插入元素
+			int key = arr[i];
+
+			//找插入位置
+			int end = i - gap;
+			while (end >= 0 && arr[end] > key)
+			{
+				arr[end + gap] = arr[end];
+				end -= gap;
+			}
+
+			//开始插入
+			arr[end + gap] = key;
+		}
+		
+	}
+}
+
+//选择排序
+void slectSort(vector<int>& arr)
+{
+	int size = arr.size();
+	for (int i = 0; i < size - 1; ++i)
+	{
+		int maxPos = 0;
+		for (int j = 1; j < size - i; ++j)
+		{
+			if (arr[j] > arr[maxPos])
+				maxPos = j;
+		}
+		if (maxPos != size-i-1)
+			swap(arr[maxPos], arr[size - i-1]);
+	}
+}
