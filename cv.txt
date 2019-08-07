@@ -1,0 +1,93 @@
+v#pragma once
+#include <vector>
+
+using namespace std;
+
+//用于判断数值类型是否存在
+class bitset
+{
+public:
+	bitset(const size_t size)
+	{
+		_bits.resize((size >> 5) + 1);
+	}
+
+	//插入
+	void Set(const size_t N)
+	{
+		//找到N在数组中的位置
+		size_t index = N >> 5;
+		//找到N在这个位置的具体的一个bit位
+		size_t bitn = N % 32;
+		//bit位置置1
+		_bits[index] |= (1 << bitn);
+
+	}
+
+	//删除
+	void ReSet(const size_t N)
+	{
+		//找到N在数组中的位置
+		size_t index = N >> 5;
+		//找到N在这个位置的具体的一个bit位
+		size_t bitn = N % 32;
+		//bit位置0
+		_bits[index] &= (~(1 << bitn));
+	}
+
+	bool Find(const size_t N)
+	{
+		//找到N在数组中的位置
+		size_t index = N >> 5;
+		//找到N在这个位置的具体的一个bit位
+		size_t bitn = N % 32;
+		//判断是否在数组中
+		return (_bits[index] & (1 << bitn));
+	}
+
+private:
+	vector<int> _bits;
+};
+
+
+//用于判断非数值类型是否存在
+//需要借助哈希函数将其转换为哈希函数，然后使用位图
+template <class T, class HashFun1, class HashFun2, class HashFun3>
+class BloomFilter
+{
+public:
+	BloomFilter(const size_t s)
+		:_bt(5*s)
+		,_bsize(5*s)
+	{}
+
+	void Set(const T& data)
+	{
+		size_t index1 = HashFun1()(data) % _bsize;
+		size_t index2 = HashFun1()(data) % _bsize;
+		size_t index2 = HashFun1()(data) % _bsize;
+
+		_bt.Set(intdex1);
+		_bt.Set(intdex2);
+		_bt.Set(intdex3);
+	}
+
+	void Find(const T& data)
+	{
+		size_t index1 = HashFun1()(data) % _bsize;
+		if (!_bt.Find(index1))
+			return false;
+		size_t index2 = HashFun1()(data) % _bsize;
+		if (!_bt.Find(index2))
+			return false;
+		size_t index2 = HashFun1()(data) % _bsize;
+		if (!_bt.Find(index3))
+			return false;
+
+		return true; 
+	}
+
+private:
+	bitset _bt;
+	size_t _bsize;
+};
