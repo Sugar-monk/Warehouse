@@ -1,0 +1,43 @@
+/*************************************************************************
+*文件名: pipe.c
+*作者: bean
+*邮箱: 17331372728@163.com
+* 创建时间: Fri 09 Aug 2019 06:58:09 PM PDT
+* 备注:这是一个创建管道的dome
+*************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
+int main(int argc, char* argv[])
+{
+    //int pipe(int pipefd[2]);
+    int pipefd[2];
+    int ret = pipe(pipefd);
+
+    if(ret < 0)
+    {
+        perror(" pipe error");
+        return -1;
+    }  
+
+
+    int pid = fork();
+
+    if(pid == 0)
+    {
+        pause();
+        char buf[1024] = {0};
+        read(pipefd[0], buf, 1023);
+        printf("child read buf:%s\n", buf);
+    }
+    else if(pid > 0)
+    {
+        sleep(1);
+        write(pipefd[1], "hello world", 1);
+    }
+	return 0;
+}
+
